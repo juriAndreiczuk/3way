@@ -1,0 +1,37 @@
+---
+import DirectionCard from "./DirectionCard.astro";
+
+interface Direction {
+  id: string;
+  number: string;
+  title: string;
+  eyebrow: string;
+  summary: string;
+  image: {
+    src: string;
+    width: number;
+    height: number;
+  };
+  imageAlt: string;
+  points: string[];
+  accent: "violet" | "blue" | "cyan";
+}
+
+interface Props {
+  directions: Direction[];
+}
+
+const { directions } = Astro.props;
+---
+
+<div class="section-heading">
+  <div>
+    <p class="section-index">/ 03 KIERUNKI</p>
+    <h2>Wybierz kierunek</h2>
+  </div>
+  <p>Kliknij <strong>??</strong>, aby odkryć kierunek, a następnie <strong>SHOW</strong>.</p>
+</div>
+
+<section class="direction-grid" aria-label="Trzy kierunki interactive web">
+  {directions.map((direction) => <DirectionCard {...direction} />)}
+</section>

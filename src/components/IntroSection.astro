@@ -1,0 +1,48 @@
+---
+import IntroThreeScene from "./IntroThreeScene.astro";
+---
+
+<header class="intro-panel">
+  <div class="intro-panel__grid" aria-hidden="true"></div>
+
+  <div class="relative z-10 grid gap-12 lg:grid-cols-2 lg:items-end">
+    <div>
+      <div
+        class="mb-8 flex items-center gap-2 text-[0.66rem] font-bold tracking-[0.24em] text-slate-500 uppercase"
+      >
+        <span class="h-px w-10 bg-violet-400"></span>
+        Mapa rozmowy / Interactive web
+      </div>
+
+      <h1
+        class="max-w-3xl text-7xl leading-[0.87] font-semibold tracking-[-0.07em] text-white mb-10"
+      >
+        Trzy nowe
+        <span class="gradient-text"> możliwości dla dwóch</span>
+        <span class="block"><span class="gradient-text"></span> kierunków</span>
+      </h1>
+      <div class="conversation-flow" aria-label="Kontekst rozmowy">
+        <div class="conversation-flow__item">
+          <span>01</span>
+          <p><strong>Marketing</strong><br />pomysł i landing</p>
+        </div>
+        <svg viewBox="0 0 40 18" aria-hidden="true"
+          ><path d="M1 9h36M31 3l6 6-6 6"></path></svg
+        >
+        <div class="conversation-flow__item">
+          <span>02</span>
+          <p><strong>Kompetencje</strong><br />nowe narzędzia</p>
+        </div>
+        <svg viewBox="0 0 40 18" aria-hidden="true"
+          ><path d="M1 9h36M31 3l6 6-6 6"></path></svg
+        >
+        <div class="conversation-flow__item conversation-flow__item--active">
+          <span>03</span>
+          <p><strong>Możliwości</strong><br />premium experience</p>
+        </div>
+      </div>
+    </div>
+
+    <IntroThreeScene />
+  </div>
+</header>
