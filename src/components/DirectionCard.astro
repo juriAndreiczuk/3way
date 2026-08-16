@@ -17,6 +17,7 @@ interface Props {
 
 const { id, number, title, eyebrow, summary, image, imageAlt, points, accent } =
   Astro.props;
+const baseUrl = import.meta.env.BASE_URL;
 ---
 
 <article
@@ -98,7 +99,7 @@ const { id, number, title, eyebrow, summary, image, imageAlt, points, accent } =
 
     <a
       class="show-button mt-9"
-      href={`/kierunki/${id}`}
+      href={baseUrl + "kierunki/" + id}
       aria-disabled="true"
       tabindex="-1"
       data-show-direction={id}

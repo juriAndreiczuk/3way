@@ -1,5 +1,7 @@
 ---
 import IntroThreeScene from "./IntroThreeScene.astro";
+
+const baseUrl = import.meta.env.BASE_URL;
 ---
 
 <header class="intro-panel">
@@ -75,7 +77,7 @@ import IntroThreeScene from "./IntroThreeScene.astro";
     </div>
     <a
       class="back-link back-link--forward intro-route-action__button"
-      href="/kierunki"
+      href={baseUrl + "kierunki"}
     >
       <span class="back-link__copy">LISTA ROZWIĄZAŃ</span>
       <span class="back-link__icon" aria-hidden="true">
