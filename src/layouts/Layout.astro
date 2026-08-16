@@ -11,7 +11,7 @@ const {
   title = "Interactive Web — Mapa rozmowy",
   description = "Trzy kierunki rozwoju interaktywnych doświadczeń webowych.",
 } = Astro.props;
-const baseUrl = import.meta.env.BASE_URL;
+const baseUrl = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 ---
 
 <!doctype html>

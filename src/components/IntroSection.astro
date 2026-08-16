@@ -1,7 +1,7 @@
 ---
 import IntroThreeScene from "./IntroThreeScene.astro";
 
-const baseUrl = import.meta.env.BASE_URL;
+const baseUrl = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 ---
 
 <header class="intro-panel">

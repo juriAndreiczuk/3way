@@ -24,7 +24,7 @@ interface Props {
 
 const panel = Astro.props;
 const standalone = panel.standalone ?? false;
-const baseUrl = import.meta.env.BASE_URL;
+const baseUrl = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 ---
 
 <article
