@@ -50,7 +50,7 @@ const { id, number, title, eyebrow, summary, image, imageAlt, points, accent } =
     aria-controls={`card-content-${id}`}
     aria-expanded="false"
   >
-    <span data-mystery-number>??</span>
+    <span data-mystery-number><span data-mystery-fallback>?</span></span>
     <span data-real-number>{number}</span>
   </button>
 
@@ -91,11 +91,16 @@ const { id, number, title, eyebrow, summary, image, imageAlt, points, accent } =
       data-testid={`show-${id}`}
       disabled
     >
-      <span data-button-label>SHOW</span>
+      <span class="show-button__copy">
+        <span class="show-button__eyebrow">kierunek {number}</span>
+        <span data-button-label>SHOW</span>
+      </span>
       <span class="show-button__line"></span>
-      <svg viewBox="0 0 18 18" aria-hidden="true">
-        <path d="M3 9h11M10 5l4 4-4 4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path>
-      </svg>
+      <span class="show-button__icon">
+        <svg viewBox="0 0 18 18" aria-hidden="true">
+          <path d="M3 9h11M10 5l4 4-4 4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path>
+        </svg>
+      </span>
     </button>
   </div>
 </article>

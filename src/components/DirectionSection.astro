@@ -1,5 +1,7 @@
 ---
 import DirectionCard from "./DirectionCard.astro";
+import MysteryQuestionScene from "./MysteryQuestionScene.astro";
+import ShowButtonEffects from "./ShowButtonEffects.astro";
 
 interface Direction {
   id: string;
@@ -34,4 +36,6 @@ const { directions } = Astro.props;
 
 <section class="direction-grid" aria-label="Trzy kierunki interactive web">
   {directions.map((direction) => <DirectionCard {...direction} />)}
+  <ShowButtonEffects />
+  <MysteryQuestionScene />
 </section>
