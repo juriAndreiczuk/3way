@@ -3,7 +3,8 @@
   data-three-intro
   aria-label="Trójwymiarowa wizualizacja współpracy Marketingu i IT"
 >
-  <canvas class="intro-three-scene__canvas" data-three-canvas aria-hidden="true"></canvas>
+  <canvas class="intro-three-scene__canvas" data-three-canvas aria-hidden="true"
+  ></canvas>
 
   <div class="intro-three-scene__labels" aria-hidden="true">
     <span>MARKETING</span>
@@ -35,12 +36,13 @@
   import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
   import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 
-  const scenes = document.querySelectorAll<HTMLElement>("[data-three-intro]");
+  let introCleanup: (() => void) | undefined;
 
   const initialiseScene = (host: HTMLElement) => {
     const canvas = host.querySelector<HTMLCanvasElement>("[data-three-canvas]");
     const modeLabel = host.querySelector<HTMLElement>("[data-mode-label]");
-    const modeToggle = host.querySelector<HTMLButtonElement>("[data-mode-toggle]");
+    const modeToggle =
+      host.querySelector<HTMLButtonElement>("[data-mode-toggle]");
     const toggleLabel = host.querySelector<HTMLElement>("[data-toggle-label]");
     if (!canvas) return;
 
@@ -142,6 +144,7 @@
       itGroup.position.set(2.12, 0, 0);
       const itCore = makeNode(0.46, cyan);
       itGroup.add(itCore);
+      const itSatellites: THREE.Group[] = [];
 
       const satellitePositions = [
         [-0.72, -0.24, 0.04],
@@ -151,6 +154,7 @@
       satellitePositions.forEach(([x, y, z]) => {
         const satellite = makeNode(0.25, cyan);
         satellite.position.set(x, y, z);
+        itSatellites.push(satellite);
         itGroup.add(satellite);
 
         const lineGeometry = new THREE.BufferGeometry().setFromPoints([
@@ -184,7 +188,9 @@
       const grid = new THREE.GridHelper(8, 22, blue, blue);
       grid.rotation.x = Math.PI / 2;
       grid.position.z = -1.35;
-      const gridMaterials = Array.isArray(grid.material) ? grid.material : [grid.material];
+      const gridMaterials = Array.isArray(grid.material)
+        ? grid.material
+        : [grid.material];
       gridMaterials.forEach((material) => {
         material.transparent = true;
         material.opacity = 0.075;
@@ -195,7 +201,10 @@
       const makeFlow = (color: number, count = 46) => {
         const geometry = new THREE.BufferGeometry();
         const positions = new Float32Array(count * 3);
-        geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+        geometry.setAttribute(
+          "position",
+          new THREE.BufferAttribute(positions, 3),
+        );
         const material = new THREE.PointsMaterial({
           color,
           size: 0.052,
@@ -205,7 +214,12 @@
           depthWrite: false,
           sizeAttenuation: true,
         });
-        return { points: new THREE.Points(geometry, material), positions, material, count };
+        return {
+          points: new THREE.Points(geometry, material),
+          positions,
+          material,
+          count,
+        };
       };
 
       const forwardFlow = makeFlow(violet);
@@ -224,7 +238,11 @@
           }),
         );
         arrow.rotation.z = direction === 1 ? -Math.PI / 2 : Math.PI / 2;
-        arrow.position.set(direction === 1 ? 1.24 : -1.25, direction === 1 ? 0.22 : -0.25, 0);
+        arrow.position.set(
+          direction === 1 ? 1.24 : -1.25,
+          direction === 1 ? 0.22 : -0.25,
+          0,
+        );
         return arrow;
       };
 
@@ -284,12 +302,12 @@
 
         if (modeLabel) {
           modeLabel.textContent = collaborationActive
-            ? "Współpraca dwukierunkowa"
+            ? "Komunikacja dwukierunkowa"
             : "Komunikacja jednokierunkowa";
         }
         if (toggleLabel) {
           toggleLabel.textContent = collaborationActive
-            ? "Wróć do komunikacji"
+            ? "Wyłącz współpracę"
             : "Włącz współpracę";
         }
       });
@@ -306,7 +324,8 @@
           const directed = direction === 1 ? progress : 1 - progress;
           const offset = index * 3;
           flow.positions[offset] = THREE.MathUtils.lerp(-1.3, 1.3, directed);
-          flow.positions[offset + 1] = lane + Math.sin(progress * Math.PI) * 0.17 * direction;
+          flow.positions[offset + 1] =
+            lane + Math.sin(progress * Math.PI) * 0.17 * direction;
           flow.positions[offset + 2] = Math.sin(progress * Math.PI * 2) * 0.09;
         }
         flow.points.geometry.attributes.position.needsUpdate = true;
@@ -325,35 +344,49 @@
         collaboration = THREE.MathUtils.damp(
           collaboration,
           collaborationTarget,
-          1.1,
+          2,
           delta,
         );
         const glowPulse = 1 + Math.sin(elapsed * 2.4) * 0.09 * collaboration;
         glowLayers.forEach(({ material, dim, bright }) => {
-          material.opacity = THREE.MathUtils.lerp(dim, bright, collaboration) * glowPulse;
+          material.opacity =
+            THREE.MathUtils.lerp(dim, bright, collaboration) * glowPulse;
         });
-        bloomPass.strength = THREE.MathUtils.lerp(0.18, 0.62, collaboration) * glowPulse;
-        renderer.toneMappingExposure = THREE.MathUtils.lerp(0.68, 0.86, collaboration);
-
-        forwardFlow.material.opacity = THREE.MathUtils.lerp(0.48, 0.84, collaboration);
-        reverseFlow.material.opacity = collaboration * 0.78;
-        (reverseArrow.material as THREE.MeshBasicMaterial).opacity = collaboration * 0.76;
-        (forwardArrow.material as THREE.MeshBasicMaterial).opacity = THREE.MathUtils.lerp(
-          0.55,
-          0.9,
+        bloomPass.strength =
+          THREE.MathUtils.lerp(0.18, 0.62, collaboration) * glowPulse;
+        renderer.toneMappingExposure = THREE.MathUtils.lerp(
+          0.68,
+          0.86,
           collaboration,
         );
+
+        forwardFlow.material.opacity = THREE.MathUtils.lerp(
+          0.48,
+          0.84,
+          collaboration,
+        );
+        reverseFlow.material.opacity = collaboration * 0.78;
+        (reverseArrow.material as THREE.MeshBasicMaterial).opacity =
+          collaboration * 0.76;
+        (forwardArrow.material as THREE.MeshBasicMaterial).opacity =
+          THREE.MathUtils.lerp(0.55, 0.9, collaboration);
 
         updateFlow(forwardFlow, elapsed, 1, 0.22);
         updateFlow(reverseFlow, elapsed, -1, -0.25);
 
-        marketing.rotation.y += delta * 0.18;
-        marketing.rotation.x += delta * 0.09;
-        itGroup.rotation.y -= delta * 0.13;
-        itCore.rotation.x += delta * 0.12;
-        teamOrbit.rotation.z += delta * (0.04 + collaboration * 0.12);
-        marketing.position.x = THREE.MathUtils.lerp(-2.15, -1.7, collaboration);
-        itGroup.position.x = THREE.MathUtils.lerp(2.12, 1.7, collaboration);
+        marketing.rotation.y += delta * (0.18 + collaboration * 0.12);
+        marketing.rotation.x += delta * (0.09 + collaboration * 0.055);
+        itGroup.rotation.y -= delta * (0.13 + collaboration * 0.09);
+        itCore.rotation.x += delta * (0.12 + collaboration * 0.1);
+        itCore.rotation.y -= delta * collaboration * 0.075;
+        itSatellites.forEach((satellite, index) => {
+          const direction = index % 2 === 0 ? 1 : -1;
+          satellite.rotation.y += delta * collaboration * 0.22 * direction;
+          satellite.rotation.x += delta * collaboration * 0.11;
+        });
+        teamOrbit.rotation.z += delta * (0.04 + collaboration * 0.2);
+        marketing.position.x = THREE.MathUtils.lerp(-2.15, -1.54, collaboration);
+        itGroup.position.x = THREE.MathUtils.lerp(2.12, 1.54, collaboration);
         const activeScale = 1 + collaboration * 0.045;
         marketing.scale.setScalar(activeScale);
         itGroup.scale.setScalar(activeScale);
@@ -386,16 +419,49 @@
         { threshold: 0.08 },
       );
       visibilityObserver.observe(host);
-      document.addEventListener("visibilitychange", () =>
-        document.hidden ? stop() : start(),
-      );
+      const handleVisibility = () => (document.hidden ? stop() : start());
+      document.addEventListener("visibilitychange", handleVisibility);
 
       host.dataset.ready = "true";
       composer.render();
+      return () => {
+        stop();
+        resizeObserver.disconnect();
+        visibilityObserver.disconnect();
+        document.removeEventListener("visibilitychange", handleVisibility);
+        composer.dispose();
+        renderer.dispose();
+        scene.traverse((object) => {
+          if (
+            object instanceof THREE.Mesh ||
+            object instanceof THREE.Points ||
+            object instanceof THREE.Line
+          ) {
+            object.geometry?.dispose();
+            const materials = Array.isArray(object.material)
+              ? object.material
+              : [object.material];
+            materials.forEach((material) => material?.dispose());
+          }
+        });
+      };
     } catch {
       host.dataset.ready = "false";
     }
   };
 
-  scenes.forEach(initialiseScene);
+  const initialiseIntro = () => {
+    introCleanup?.();
+    introCleanup = undefined;
+    const host = document.querySelector<HTMLElement>("[data-three-intro]");
+    if (host) introCleanup = initialiseScene(host);
+  };
+
+  const cleanupIntro = () => {
+    introCleanup?.();
+    introCleanup = undefined;
+  };
+
+  document.addEventListener("astro:page-load", initialiseIntro);
+  document.addEventListener("astro:before-swap", cleanupIntro);
 </script>

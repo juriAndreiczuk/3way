@@ -18,11 +18,16 @@
     opacity: number;
   }
 
-  const canvas = document.querySelector<HTMLCanvasElement>("[data-mystery-question-layer]");
-  const grid = canvas?.closest<HTMLElement>(".direction-grid");
-  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let mysteryCleanup: (() => void) | undefined;
 
-  if (canvas && grid) {
+  const initialiseMysteryQuestions = () => {
+    mysteryCleanup?.();
+    mysteryCleanup = undefined;
+    const canvas = document.querySelector<HTMLCanvasElement>("[data-mystery-question-layer]");
+    const grid = canvas?.closest<HTMLElement>(".direction-grid");
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!canvas || !grid) return;
+
     try {
       const renderer = new THREE.WebGLRenderer({
         canvas,
@@ -57,6 +62,7 @@
       const haloTexture = createHaloTexture();
       const cards = Array.from(grid.querySelectorAll<HTMLElement>("[data-reveal-card]"));
       const marks: QuestionMark[] = cards.flatMap((card) => {
+        if (card.dataset.revealed === "true") return [];
         const trigger = card.querySelector<HTMLElement>("[data-reveal-trigger]");
         if (!trigger) return [];
 
@@ -221,11 +227,36 @@
         { threshold: 0.04 },
       );
       visibilityObserver.observe(grid);
-      document.addEventListener("visibilitychange", () =>
-        document.hidden ? stop() : start(),
-      );
+      const handleVisibility = () => (document.hidden ? stop() : start());
+      document.addEventListener("visibilitychange", handleVisibility);
+      mysteryCleanup = () => {
+        stop();
+        resizeObserver.disconnect();
+        visibilityObserver.disconnect();
+        document.removeEventListener("visibilitychange", handleVisibility);
+        marks.forEach((mark) => {
+          mark.scene.traverse((object) => {
+            if (object instanceof THREE.Mesh || object instanceof THREE.LineSegments) {
+              object.geometry?.dispose();
+              const materials = Array.isArray(object.material) ? object.material : [object.material];
+              materials.forEach((material) => material?.dispose());
+            }
+          });
+          mark.halo.dispose();
+        });
+        haloTexture.dispose();
+        renderer.dispose();
+      };
     } catch {
       canvas.hidden = true;
     }
-  }
+  };
+
+  const cleanupMysteryQuestions = () => {
+    mysteryCleanup?.();
+    mysteryCleanup = undefined;
+  };
+
+  document.addEventListener("astro:page-load", initialiseMysteryQuestions);
+  document.addEventListener("astro:before-swap", cleanupMysteryQuestions);
 </script>

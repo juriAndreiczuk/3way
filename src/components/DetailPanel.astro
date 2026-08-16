@@ -19,16 +19,20 @@ interface Props {
     label: string;
     href: string;
   }>;
+  standalone?: boolean;
 }
 
 const panel = Astro.props;
+const standalone = panel.standalone ?? false;
 ---
 
 <article
   id={`panel-${panel.id}`}
-  class="detail-panel"
+  class:list={["detail-panel", { "detail-panel--standalone": standalone }]}
   data-direction-panel={panel.id}
-  hidden
+  data-standalone-detail={standalone ? "true" : undefined}
+  data-visible={standalone ? "true" : undefined}
+  hidden={!standalone}
   tabindex="-1"
 >
   <div class="detail-panel__header">
@@ -37,16 +41,30 @@ const panel = Astro.props;
       <p data-split-kicker>{panel.kicker}</p>
       <h2 data-split-title>{panel.title}</h2>
     </div>
-    <button
-      class="close-button"
-      type="button"
-      aria-label={`Zamknij: ${panel.title}`}
-      data-close-panel
-    >
-      <svg viewBox="0 0 24 24" aria-hidden="true"
-        ><path d="m6 6 12 12M18 6 6 18"></path></svg
+    {standalone ? (
+      <a
+        class="back-link"
+        href="/kierunki"
+        aria-label="Wróć do wyboru kierunku"
+        data-detail-back
       >
-    </button>
+        <span class="back-link__icon" aria-hidden="true">
+          <svg viewBox="0 0 18 18">
+            <path d="M15 9H4M8 5 4 9l4 4"></path>
+          </svg>
+        </span>
+        <span class="back-link__copy">POWRÓT</span>
+      </a>
+    ) : (
+      <button
+        class="close-button"
+        type="button"
+        aria-label={`Zamknij: ${panel.title}`}
+        data-close-panel
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg>
+      </button>
+    )}
   </div>
 
   <div class="detail-panel__body">

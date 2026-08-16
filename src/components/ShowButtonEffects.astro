@@ -13,7 +13,7 @@
 
   interface ButtonEffect {
     card: HTMLElement;
-    button: HTMLButtonElement;
+    button: HTMLAnchorElement;
     content: HTMLElement;
     root: Container;
     frame: Graphics;
@@ -28,13 +28,17 @@
     colour: number;
   }
 
-  const canvas = document.querySelector<HTMLCanvasElement>("[data-show-effects-layer]");
-  const grid = canvas?.closest<HTMLElement>(".direction-grid");
-  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let showEffectsCleanup: (() => void) | undefined;
 
-  if (canvas && grid) {
-    const initialise = async () => {
-      try {
+  const initialiseShowEffects = async () => {
+    showEffectsCleanup?.();
+    showEffectsCleanup = undefined;
+    const canvas = document.querySelector<HTMLCanvasElement>("[data-show-effects-layer]");
+    const grid = canvas?.closest<HTMLElement>(".direction-grid");
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!canvas || !grid) return;
+
+    try {
         const app = new Application();
         await app.init({
           canvas,
@@ -57,7 +61,7 @@
         const effects: ButtonEffect[] = Array.from(
           grid.querySelectorAll<HTMLElement>("[data-reveal-card]"),
         ).flatMap((card) => {
-          const button = card.querySelector<HTMLButtonElement>("[data-show-direction]");
+          const button = card.querySelector<HTMLAnchorElement>("[data-show-direction]");
           const content = card.querySelector<HTMLElement>("[data-card-content]");
           if (!button || !content) return [];
 
@@ -137,7 +141,8 @@
           const canvasBounds = canvas.getBoundingClientRect();
 
           effects.forEach((effect) => {
-            if (!effect.button.disabled && !effect.entered) {
+            const disabled = effect.button.getAttribute("aria-disabled") === "true";
+            if (!disabled && !effect.entered) {
               effect.entered = true;
               if (!reducedMotion) {
                 gsap.fromTo(
@@ -149,7 +154,7 @@
             }
 
             const contentOpacity = Number.parseFloat(getComputedStyle(effect.content).opacity) || 0;
-            const targetAlpha = effect.button.disabled ? 0 : contentOpacity;
+            const targetAlpha = disabled ? 0 : contentOpacity;
             effect.alpha += (targetAlpha - effect.alpha) * (1 - Math.exp(-delta * 3.2));
             effect.burst += (0 - effect.burst) * (1 - Math.exp(-delta * 2.5));
             effect.root.alpha = effect.alpha;
@@ -209,14 +214,25 @@
           { threshold: 0.04 },
         );
         visibilityObserver.observe(grid);
-        document.addEventListener("visibilitychange", () =>
-          document.hidden ? app.stop() : app.start(),
-        );
-      } catch {
-        canvas.hidden = true;
-      }
-    };
+        const handleVisibility = () => (document.hidden ? app.stop() : app.start());
+        document.addEventListener("visibilitychange", handleVisibility);
+        showEffectsCleanup = () => {
+          app.stop();
+          visibilityObserver.disconnect();
+          document.removeEventListener("visibilitychange", handleVisibility);
+          effects.forEach((effect) => gsap.killTweensOf(effect.button));
+          app.destroy();
+        };
+    } catch {
+      canvas.hidden = true;
+    }
+  };
 
-    void initialise();
-  }
+  const cleanupShowEffects = () => {
+    showEffectsCleanup?.();
+    showEffectsCleanup = undefined;
+  };
+
+  document.addEventListener("astro:page-load", () => void initialiseShowEffects());
+  document.addEventListener("astro:before-swap", cleanupShowEffects);
 </script>
