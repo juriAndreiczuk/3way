@@ -41,7 +41,7 @@ export const directions: Direction[] = [
       "Efektowne, płynne interfejsy, które przyciągają uwagę i pozwalają opowiadać poprzez ruch.",
     image: questionsImage,
     imageAlt: "Neonowe znaki zapytania ukryte pod efektem PixiJS",
-    points: ["Interakcje i animacje", "Wizualizacje 2D / 3D", "Duża liczba obiektów"],
+    points: ["Pixi.js", "Three.js", "GSAP.js"],
     accent: "violet",
   },
   {
