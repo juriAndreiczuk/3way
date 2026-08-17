@@ -59,7 +59,7 @@ export const directions: Direction[] = [
   {
     id: "web-apps",
     number: "03",
-    title: "MINI APPS",
+    title: "MINI SPA",
     eyebrow: "Frontend • Fullstack • BaaS",
     summary:
       "Kompletne narzędzia z własną logiką, panelem użytkownika, administracją i statystykami.",
