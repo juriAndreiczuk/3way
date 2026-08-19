@@ -1,0 +1,544 @@
+{
+  "config": {
+    "title": "Znajdź kierunek dla siebie",
+    "description": "Odpowiedz na 5 krótkich pytań i zobacz kierunki oraz kursy, które mogą pasować do Twoich zainteresowań.",
+    "questionsPerSession": 5,
+    "resultsLimit": 4,
+    "primaryResultLabel": "Najlepsze dopasowanie",
+    "secondaryResultLabel": "Może Ci również pasować",
+    "additionalResultLabel": "Warto również rozważyć"
+  },
+
+  "categories": [
+    {
+      "id": "pedagogika",
+      "name": "PEDAGOGIKA"
+    },
+    {
+      "id": "prawo",
+      "name": "PRAWO"
+    },
+    {
+      "id": "sport",
+      "name": "SPORT"
+    },
+    {
+      "id": "zdrowie",
+      "name": "ZDROWIE I KOSMETOLOGIA"
+    },
+    {
+      "id": "biznes",
+      "name": "BIZNES"
+    }
+  ],
+
+  "courses": [
+    {
+      "id": "ped-psych",
+      "categoryId": "pedagogika",
+      "name": "Przygotowanie pedagogiczne dla psychologów",
+      "link": "https://studia-online.pl/studia/podyplomowe/przygotowanie-pedagogiczne-dla-psychologow/4866677"
+    },
+    {
+      "id": "ped-language",
+      "categoryId": "pedagogika",
+      "name": "Przygotowanie pedagogiczne do nauczania języka obcego",
+      "link": "https://studia-online.pl/studia/podyplomowe/przygotowanie-pedagogiczne-do-nauczania-jezyka-obcego/626"
+    },
+    {
+      "id": "ped-vocational",
+      "categoryId": "pedagogika",
+      "name": "Przygotowanie pedagogiczne do nauczania przedmiotów zawodowych",
+      "link": "https://studia-online.pl/studia/podyplomowe/przygotowanie-pedagogiczne-do-nauczania-przedmiotow-zawodowych/4867030"
+    },
+
+    {
+      "id": "law-work",
+      "categoryId": "prawo",
+      "name": "Prawo pracy",
+      "link": "https://studia-online.pl/studia/podyplomowe/prawo-pracy/4867049"
+    },
+    {
+      "id": "law-criminal",
+      "categoryId": "prawo",
+      "name": "Prawo karne materialne i procesowe",
+      "link": "https://studia-online.pl/studia/podyplomowe/prawo-karne-materialne-i-procesowe/4867060"
+    },
+    {
+      "id": "law-enforcement",
+      "categoryId": "prawo",
+      "name": "Prawo karne wykonawcze",
+      "link": "https://studia-online.pl/studia/podyplomowe/prawo-karne-wykonawcze/4867067"
+    },
+
+    {
+      "id": "sport-adapted",
+      "categoryId": "sport",
+      "name": "Adaptowana aktywność fizyczna",
+      "link": "https://studia-online.pl/studia/podyplomowe/adaptowana-aktywnosc-fizyczna/4867143"
+    },
+    {
+      "id": "sport-analyst",
+      "categoryId": "sport",
+      "name": "Analityk gry sportowej",
+      "link": "https://studia-online.pl/studia/podyplomowe/analityk-gry-sportowej/4867145"
+    },
+    {
+      "id": "sport-dance",
+      "categoryId": "sport",
+      "name": "Animacja form taneczno-ruchowych",
+      "link": "https://studia-online.pl/studia/podyplomowe/animacja-form-taneczno-ruchowych/4867152"
+    },
+
+    {
+      "id": "health-cosmetology",
+      "categoryId": "zdrowie",
+      "name": "Kosmetologia",
+      "link": "https://studia-online.pl/studia/podyplomowe/kosmetologia/4867918"
+    },
+    {
+      "id": "health-styling",
+      "categoryId": "zdrowie",
+      "name": "Stylizacja i wizaż",
+      "link": "https://studia-online.pl/studia/podyplomowe/stylizacja-i-wizaz/4867927"
+    },
+    {
+      "id": "health-podology",
+      "categoryId": "zdrowie",
+      "name": "Podologia",
+      "link": "https://studia-online.pl/studia/podyplomowe/podologia/4867924"
+    },
+
+    {
+      "id": "business-career",
+      "categoryId": "biznes",
+      "name": "Doradztwo zawodowe",
+      "link": "https://studia-online.pl/studia/podyplomowe/doradztwo-zawodowe-2-sem-instytucje-rynku-pracy/103"
+    },
+    {
+      "id": "business-eco",
+      "categoryId": "biznes",
+      "name": "Ekologia w biznesie",
+      "link": "https://studia-online.pl/studia/podyplomowe/ekologia-w-biznesie/4867981"
+    },
+    {
+      "id": "business-english",
+      "categoryId": "biznes",
+      "name": "Business English",
+      "link": "https://studia-online.pl/studia/podyplomowe/business-english-jezyk-angielski-w-biznesie/4868000"
+    }
+  ],
+
+  "questions": [
+    {
+      "id": "q1",
+      "type": "routing",
+      "question": "Który obszar najbardziej Cię interesuje?",
+      "answers": [
+        {
+          "id": "A",
+          "label": "Edukacja i praca z ludźmi",
+          "nextQuestionId": "q2-pedagogika",
+          "scores": {
+            "ped-psych": 3,
+            "ped-language": 3,
+            "ped-vocational": 3,
+            "business-career": 1
+          }
+        },
+        {
+          "id": "B",
+          "label": "Prawo, zasady i analiza",
+          "nextQuestionId": "q2-prawo",
+          "scores": {
+            "law-work": 3,
+            "law-criminal": 3,
+            "law-enforcement": 3
+          }
+        },
+        {
+          "id": "C",
+          "label": "Sport i aktywność fizyczna",
+          "nextQuestionId": "q2-sport",
+          "scores": {
+            "sport-adapted": 3,
+            "sport-analyst": 3,
+            "sport-dance": 3
+          }
+        },
+        {
+          "id": "D",
+          "label": "Zdrowie, uroda i praca z klientem",
+          "nextQuestionId": "q2-zdrowie",
+          "scores": {
+            "health-cosmetology": 3,
+            "health-styling": 3,
+            "health-podology": 3
+          }
+        },
+        {
+          "id": "E",
+          "label": "Biznes i rozwój zawodowy",
+          "nextQuestionId": "q2-biznes",
+          "scores": {
+            "business-career": 3,
+            "business-eco": 3,
+            "business-english": 3
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "q2-pedagogika",
+      "type": "scoring",
+      "question": "Z kim najbardziej chciałbyś pracować?",
+      "nextQuestionId": "q3",
+      "answers": [
+        {
+          "id": "A",
+          "label": "Z osobami potrzebującymi wsparcia psychologicznego",
+          "scores": {
+            "ped-psych": 4,
+            "business-career": 1
+          }
+        },
+        {
+          "id": "B",
+          "label": "Z osobami uczącymi się języków",
+          "scores": {
+            "ped-language": 4,
+            "business-english": 2
+          }
+        },
+        {
+          "id": "C",
+          "label": "Z osobami zdobywającymi konkretny zawód",
+          "scores": {
+            "ped-vocational": 4,
+            "business-career": 1
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "q2-prawo",
+      "type": "scoring",
+      "question": "Który rodzaj problemów wydaje Ci się najbardziej interesujący?",
+      "nextQuestionId": "q3",
+      "answers": [
+        {
+          "id": "A",
+          "label": "Relacje między pracownikiem a pracodawcą",
+          "scores": {
+            "law-work": 4,
+            "business-career": 1
+          }
+        },
+        {
+          "id": "B",
+          "label": "Analiza przestępstw, odpowiedzialności i procedur",
+          "scores": {
+            "law-criminal": 4
+          }
+        },
+        {
+          "id": "C",
+          "label": "Wykonywanie kar i funkcjonowanie systemu penitencjarnego",
+          "scores": {
+            "law-enforcement": 4
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "q2-sport",
+      "type": "scoring",
+      "question": "Co najbardziej interesuje Cię w sporcie?",
+      "nextQuestionId": "q3",
+      "answers": [
+        {
+          "id": "A",
+          "label": "Pomaganie ludziom poprzez odpowiednio dobraną aktywność",
+          "scores": {
+            "sport-adapted": 4,
+            "health-podology": 1
+          }
+        },
+        {
+          "id": "B",
+          "label": "Analiza wyników, taktyki i danych",
+          "scores": {
+            "sport-analyst": 4,
+            "business-eco": 1
+          }
+        },
+        {
+          "id": "C",
+          "label": "Ruch, muzyka i praca kreatywna",
+          "scores": {
+            "sport-dance": 4,
+            "health-styling": 1
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "q2-zdrowie",
+      "type": "scoring",
+      "question": "Który rodzaj pracy najbardziej Ci odpowiada?",
+      "nextQuestionId": "q3",
+      "answers": [
+        {
+          "id": "A",
+          "label": "Pielęgnacja skóry i zabiegi kosmetyczne",
+          "scores": {
+            "health-cosmetology": 4
+          }
+        },
+        {
+          "id": "B",
+          "label": "Styl, makijaż i kreowanie wizerunku",
+          "scores": {
+            "health-styling": 4
+          }
+        },
+        {
+          "id": "C",
+          "label": "Zdrowie stóp i praca wymagająca precyzji",
+          "scores": {
+            "health-podology": 4,
+            "sport-adapted": 1
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "q2-biznes",
+      "type": "scoring",
+      "question": "W którym obszarze biznesowym widzisz siebie najbardziej?",
+      "nextQuestionId": "q3",
+      "answers": [
+        {
+          "id": "A",
+          "label": "Pomaganie ludziom w rozwoju kariery",
+          "scores": {
+            "business-career": 4,
+            "ped-psych": 1
+          }
+        },
+        {
+          "id": "B",
+          "label": "Łączenie biznesu z ekologią i zrównoważonym rozwojem",
+          "scores": {
+            "business-eco": 4
+          }
+        },
+        {
+          "id": "C",
+          "label": "Komunikacja międzynarodowa i język angielski",
+          "scores": {
+            "business-english": 4,
+            "ped-language": 2
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "q3",
+      "type": "scoring",
+      "question": "Jaki sposób pracy najbardziej Ci odpowiada?",
+      "nextQuestionId": "q4",
+      "answers": [
+        {
+          "id": "A",
+          "label": "Kontakt z ludźmi, rozmowa i wspieranie innych",
+          "scores": {
+            "ped-psych": 2,
+            "ped-language": 1,
+            "business-career": 3,
+            "health-cosmetology": 1,
+            "health-styling": 1
+          }
+        },
+        {
+          "id": "B",
+          "label": "Analiza informacji, zasad i danych",
+          "scores": {
+            "law-work": 2,
+            "law-criminal": 2,
+            "law-enforcement": 1,
+            "sport-analyst": 3,
+            "business-eco": 2
+          }
+        },
+        {
+          "id": "C",
+          "label": "Praktyczne działanie i widoczny efekt pracy",
+          "scores": {
+            "ped-vocational": 1,
+            "sport-adapted": 2,
+            "sport-dance": 2,
+            "health-cosmetology": 2,
+            "health-styling": 2,
+            "health-podology": 2
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "q4",
+      "type": "scoring",
+      "question": "Co daje Ci największą satysfakcję?",
+      "nextQuestionId": "q5",
+      "answers": [
+        {
+          "id": "A",
+          "label": "Widzieć rozwój drugiej osoby",
+          "scores": {
+            "ped-psych": 3,
+            "ped-language": 2,
+            "ped-vocational": 2,
+            "business-career": 3
+          }
+        },
+        {
+          "id": "B",
+          "label": "Rozwiązać trudny problem i znaleźć konkretne rozwiązanie",
+          "scores": {
+            "law-work": 2,
+            "law-criminal": 3,
+            "law-enforcement": 2,
+            "sport-analyst": 2,
+            "business-eco": 2
+          }
+        },
+        {
+          "id": "C",
+          "label": "Stworzyć coś, czego efekt można od razu zobaczyć",
+          "scores": {
+            "sport-dance": 2,
+            "health-cosmetology": 2,
+            "health-styling": 3,
+            "health-podology": 2
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "q5",
+      "type": "scoring",
+      "question": "W jakim środowisku najłatwiej wyobrażasz sobie swoją przyszłą pracę?",
+      "nextQuestionId": "q6",
+      "answers": [
+        {
+          "id": "A",
+          "label": "Szkoła, uczelnia, szkolenia lub praca rozwojowa",
+          "scores": {
+            "ped-psych": 2,
+            "ped-language": 3,
+            "ped-vocational": 3,
+            "business-career": 2
+          }
+        },
+        {
+          "id": "B",
+          "label": "Biuro, firma lub organizacja",
+          "scores": {
+            "law-work": 3,
+            "business-career": 2,
+            "business-eco": 3,
+            "business-english": 3
+          }
+        },
+        {
+          "id": "C",
+          "label": "Gabinet, studio, klub lub miejsce pracy praktycznej",
+          "scores": {
+            "sport-adapted": 2,
+            "sport-dance": 2,
+            "health-cosmetology": 3,
+            "health-styling": 3,
+            "health-podology": 3
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "q6",
+      "type": "scoring",
+      "question": "Co jest dla Ciebie najważniejsze przy wyborze kierunku?",
+      "nextQuestionId": null,
+      "answers": [
+        {
+          "id": "A",
+          "label": "Praca z ludźmi i wspieranie ich rozwoju",
+          "scores": {
+            "ped-psych": 2,
+            "ped-language": 1,
+            "ped-vocational": 1,
+            "sport-adapted": 1,
+            "business-career": 2
+          }
+        },
+        {
+          "id": "B",
+          "label": "Specjalistyczna wiedza, analiza i jasno określone zasady",
+          "scores": {
+            "law-work": 2,
+            "law-criminal": 2,
+            "law-enforcement": 2,
+            "sport-analyst": 2,
+            "business-eco": 1
+          }
+        },
+        {
+          "id": "C",
+          "label": "Praktyczne umiejętności, które mogę wykorzystać w pracy",
+          "scores": {
+            "ped-vocational": 1,
+            "sport-adapted": 1,
+            "sport-dance": 2,
+            "health-cosmetology": 2,
+            "health-styling": 2,
+            "health-podology": 2,
+            "business-english": 1
+          }
+        }
+      ]
+    }
+  ],
+
+  "resultLogic": {
+    "strategy": "highest_score",
+    "sort": "descending",
+    "primaryResult": 1,
+    "alternativeResults": 3,
+    "tieBreaker": "first_higher_score_from_routing_question"
+  },
+
+  "resultTemplate": {
+    "heading": "Na podstawie Twoich odpowiedzi",
+    "primary": {
+      "label": "Najlepsze dopasowanie",
+      "categoryField": "category.name",
+      "courseField": "course.name"
+    },
+    "alternatives": {
+      "label": "Inne kierunki, które warto rozważyć",
+      "count": 3
+    },
+    "cta": {
+      "label": "Zobacz kurs",
+      "secondaryLabel": "Sprawdź inne możliwości"
+    }
+  }
+}
