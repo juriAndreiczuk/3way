@@ -16,11 +16,6 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/?$/, "/");
   </head>
   <body>
     <main>
-      <header class="page-header">
-        <h1>{courseConfigurator.config.title}</h1>
-        <p>{courseConfigurator.config.description}</p>
-      </header>
-
       <CourseConfigurator client:load />
     </main>
   </body>
@@ -49,22 +44,4 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/?$/, "/");
     padding: 4rem 0;
   }
 
-  .page-header {
-    width: min(100%, 760px);
-    margin-inline: auto;
-    margin-bottom: 2rem;
-    text-align: center;
-  }
-
-  h1 {
-    margin: 0 0 0.75rem;
-  }
-
-  p {
-    max-width: 60ch;
-    margin: 0;
-    margin-inline: auto;
-    color: #9693aa;
-    line-height: 1.6;
-  }
 </style>

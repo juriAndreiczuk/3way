@@ -5,15 +5,21 @@ import { CategoryGlyph, getVisualCategory, type VisualCategoryId } from "./visua
 
 const processingMessages = [
   "Analizujemy odpowiedzi",
-  "Porównujemy 15 kursów",
+  "Porównujemy dostępne kierunki",
   "Ustalamy poziom dopasowania",
 ] as const;
 
 export default function ProcessingStage({
   categoryId,
+  answerCount,
+  courseCount,
+  areaCount,
   onComplete,
 }: {
   categoryId: VisualCategoryId;
+  answerCount: number;
+  courseCount: number;
+  areaCount: number;
   onComplete: () => void;
 }) {
   const [messageIndex, setMessageIndex] = useState(0);
@@ -63,7 +69,9 @@ export default function ProcessingStage({
       <div className="processing-progress" aria-hidden="true">
         <span ref={progressRef} style={{ background: category.cssColour }} />
       </div>
-      <p className="processing-caption">6 odpowiedzi · 15 kursów · 5 obszarów</p>
+      <p className="processing-caption">
+        {answerCount} odpowiedzi · {courseCount} kierunków · {areaCount} obszarów
+      </p>
     </section>
   );
 }

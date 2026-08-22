@@ -301,20 +301,53 @@ export default function NeonCompassStage({
     );
     root.add(needle);
 
-    const pulseMaterial = new THREE.MeshBasicMaterial({
+    const pulseCoreMaterial = new THREE.MeshBasicMaterial({
       color: 0x20d9ff,
       transparent: true,
       opacity: 0,
-      side: THREE.DoubleSide,
       depthWrite: false,
+      depthTest: false,
+      blending: THREE.AdditiveBlending,
     });
-    const pulseRing = new THREE.Mesh(
-      new THREE.RingGeometry(0.97, 1, 72),
-      pulseMaterial,
+    const pulseCyanGlowMaterial = new THREE.MeshBasicMaterial({
+      color: 0x20d9ff,
+      transparent: true,
+      opacity: 0,
+      depthWrite: false,
+      depthTest: false,
+      blending: THREE.AdditiveBlending,
+    });
+    const pulseVioletGlowMaterial = new THREE.MeshBasicMaterial({
+      color: 0x9b6cff,
+      transparent: true,
+      opacity: 0,
+      depthWrite: false,
+      depthTest: false,
+      blending: THREE.AdditiveBlending,
+    });
+    const pulseCore = new THREE.Mesh(
+      new THREE.TorusGeometry(1, 0.018, 10, 96),
+      pulseCoreMaterial,
     );
-    pulseRing.position.z = 0.16;
-    pulseRing.scale.setScalar(0.3);
-    root.add(pulseRing);
+    const pulseCyanGlow = new THREE.Mesh(
+      new THREE.TorusGeometry(1, 0.052, 10, 96),
+      pulseCyanGlowMaterial,
+    );
+    const pulseVioletGlow = new THREE.Mesh(
+      new THREE.TorusGeometry(1, 0.09, 10, 96),
+      pulseVioletGlowMaterial,
+    );
+    const pulseGroup = new THREE.Group();
+    pulseGroup.position.z = 0.16;
+    pulseGroup.rotation.x = -0.12;
+    pulseCore.position.z = 0.035;
+    pulseCyanGlow.position.z = 0.018;
+    pulseVioletGlow.position.z = 0;
+    pulseCore.scale.setScalar(0.3);
+    pulseCyanGlow.scale.setScalar(0.27);
+    pulseVioletGlow.scale.setScalar(0.24);
+    pulseGroup.add(pulseVioletGlow, pulseCyanGlow, pulseCore);
+    root.add(pulseGroup);
 
     let isActive = false;
     let elapsed = 0;
@@ -346,14 +379,30 @@ export default function NeonCompassStage({
           duration: 1.05,
           ease: "power3.inOut",
         })
-        .set(pulseMaterial, { opacity: 0.9 }, 0.72)
+        .set(pulseCoreMaterial, { opacity: 1 }, 0.72)
+        .set(pulseCyanGlowMaterial, { opacity: 0.34 }, 0.72)
+        .set(pulseVioletGlowMaterial, { opacity: 0.2 }, 0.76)
         .fromTo(
-          pulseRing.scale,
+          pulseCore.scale,
           { x: 0.28, y: 0.28, z: 0.28 },
           { x: 1.72, y: 1.72, z: 1.72, duration: 0.62, ease: "power2.out" },
           0.72,
         )
-        .to(pulseMaterial, { opacity: 0, duration: 0.32 }, 1.05)
+        .fromTo(
+          pulseCyanGlow.scale,
+          { x: 0.25, y: 0.25, z: 0.25 },
+          { x: 1.82, y: 1.82, z: 1.82, duration: 0.74, ease: "power2.out" },
+          0.72,
+        )
+        .fromTo(
+          pulseVioletGlow.scale,
+          { x: 0.22, y: 0.22, z: 0.22 },
+          { x: 1.92, y: 1.92, z: 1.92, duration: 0.86, ease: "power2.out" },
+          0.76,
+        )
+        .to(pulseCoreMaterial, { opacity: 0, duration: 0.34 }, 1.03)
+        .to(pulseCyanGlowMaterial, { opacity: 0, duration: 0.48 }, 1.02)
+        .to(pulseVioletGlowMaterial, { opacity: 0, duration: 0.58 }, 1.04)
         .to(
           root.scale,
           {

@@ -1,44 +1,45 @@
 import { useEffect, useRef } from "react";
-import { Application, Graphics } from "pixi.js";
+import { Application, Container, Graphics } from "pixi.js";
 
-interface Particle {
+interface ConfiguratorEffectsProps {
+  pulseKey: number;
+  colour: number;
+  target: HTMLButtonElement | null;
+}
+
+interface FlowParticle {
   graphic: Graphics;
-  life: number;
-  duration: number;
   offset: number;
-  lift: number;
-  startX: number;
-  startY: number;
-  targetX: number;
-  targetY: number;
+  lane: number;
+  speed: number;
+  phase: number;
+}
+
+interface ActivePulse {
+  root: Container;
+  mask: Graphics;
+  glow: Graphics;
+  particles: FlowParticle[];
+  elapsed: number;
+  duration: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
 }
 
 interface EffectsApi {
-  burst: (colour: number, processing: boolean) => void;
+  pulse: (colour: number, target: HTMLButtonElement) => void;
 }
 
 export default function ConfiguratorEffects({
   pulseKey,
   colour,
-  processing,
-}: {
-  pulseKey: number;
-  colour: number;
-  processing: boolean;
-}) {
+  target,
+}: ConfiguratorEffectsProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const apiRef = useRef<EffectsApi | null>(null);
-  const colourRef = useRef(colour);
-  const processingRef = useRef(processing);
-
-  useEffect(() => {
-    colourRef.current = colour;
-  }, [colour]);
-
-  useEffect(() => {
-    processingRef.current = processing;
-  }, [processing]);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -47,7 +48,6 @@ export default function ConfiguratorEffects({
 
     let disposed = false;
     let app: Application | null = null;
-    let handleVisibility: (() => void) | null = null;
 
     const initialise = async () => {
       const instance = new Application();
@@ -61,6 +61,7 @@ export default function ConfiguratorEffects({
         preference: "webgl",
         powerPreference: "high-performance",
       });
+
       if (disposed) {
         instance.destroy();
         return;
@@ -68,74 +69,112 @@ export default function ConfiguratorEffects({
 
       app = instance;
       instance.ticker.maxFPS = 30;
-      const particles: Particle[] = [];
+      const activePulses: ActivePulse[] = [];
 
-      const burst = (burstColour: number, isProcessing: boolean) => {
-        const amount = isProcessing ? 44 : 24;
-        const width = instance.screen.width;
-        const height = instance.screen.height;
-        for (let index = 0; index < amount; index += 1) {
-          const radius = index % 5 === 0 ? 2.4 : 1.2 + (index % 3) * 0.35;
-          const graphic = new Graphics().circle(0, 0, radius).fill({
-            color: burstColour,
-            alpha: 0.82,
-          });
-          instance.stage.addChild(graphic);
-          particles.push({
-            graphic,
-            life: 0,
-            duration: 1.35 + (index % 7) * 0.08,
-            offset: index / amount,
-            lift: 36 + (index % 6) * 14,
-            startX: isProcessing
-              ? width * 0.5
-              : width * (0.58 + (index % 5) * 0.035),
-            startY: isProcessing ? height * 0.75 : height * 0.72,
-            targetX: isProcessing ? width * 0.5 : width * 0.16,
-            targetY: isProcessing ? height * 0.38 : height * 0.2,
-          });
-        }
+      const pulse = (pulseColour: number, pulseTarget: HTMLButtonElement) => {
+        const hostBounds = host.getBoundingClientRect();
+        const targetBounds = pulseTarget.getBoundingClientRect();
+        const x = targetBounds.left - hostBounds.left;
+        const y = targetBounds.top - hostBounds.top;
+        const width = targetBounds.width;
+        const height = targetBounds.height;
+
+        if (width <= 0 || height <= 0) return;
+
+        const root = new Container();
+        const mask = new Graphics()
+          .roundRect(x, y, width, height, Math.min(14, height * 0.2))
+          .fill({ color: 0xffffff });
+        const glow = new Graphics()
+          .roundRect(x, y, width, height, Math.min(14, height * 0.2))
+          .fill({ color: pulseColour, alpha: 0.095 });
+        const particleCount = Math.max(
+          20,
+          Math.min(34, Math.round(width / 22)),
+        );
+        const particles: FlowParticle[] = Array.from(
+          { length: particleCount },
+          (_, index) => {
+            const radius =
+              index % 6 === 0 ? 2.5 : index % 3 === 0 ? 1.8 : 1.35;
+            const graphic = new Graphics().circle(0, 0, radius).fill({
+              color: pulseColour,
+              alpha: 0.88,
+            });
+            root.addChild(graphic);
+            return {
+              graphic,
+              offset: index / particleCount,
+              lane: ((index * 7) % 11) / 10,
+              speed: 0.12 + (index % 5) * 0.025,
+              phase: index * 1.37,
+            };
+          },
+        );
+
+        root.addChildAt(glow, 0);
+        root.mask = mask;
+        instance.stage.addChild(mask);
+        instance.stage.addChild(root);
+        activePulses.push({
+          root,
+          mask,
+          glow,
+          particles,
+          elapsed: 0,
+          duration: 1.25,
+          x,
+          y,
+          width,
+          height,
+        });
+        instance.start();
       };
 
-      apiRef.current = { burst };
-      let processingTimer = 0;
+      apiRef.current = { pulse };
+
       instance.ticker.add((ticker) => {
         const delta = Math.min(ticker.deltaMS / 1000, 0.08);
-        processingTimer += delta;
-        if (processingRef.current && processingTimer > 0.65) {
-          processingTimer = 0;
-          burst(colourRef.current, true);
-        }
 
-        for (let index = particles.length - 1; index >= 0; index -= 1) {
-          const particle = particles[index];
-          particle.life += delta;
-          const progress = Math.min(particle.life / particle.duration, 1);
-          const eased = 1 - Math.pow(1 - progress, 3);
-          const wave =
-            Math.sin((progress + particle.offset) * Math.PI * 2) * 18;
-          particle.graphic.position.set(
-            particle.startX +
-              (particle.targetX - particle.startX) * eased +
-              wave,
-            particle.startY +
-              (particle.targetY - particle.startY) * eased -
-              Math.sin(progress * Math.PI) * particle.lift,
-          );
-          particle.graphic.alpha = Math.sin(progress * Math.PI) * 0.88;
-          particle.graphic.scale.set(0.7 + Math.sin(progress * Math.PI) * 0.8);
+        for (let index = activePulses.length - 1; index >= 0; index -= 1) {
+          const effect = activePulses[index];
+          effect.elapsed += delta;
+          const time = Math.min(effect.elapsed / effect.duration, 1);
+          const envelope = Math.sin(time * Math.PI);
+          effect.glow.alpha = envelope * 0.9;
 
-          if (progress >= 1) {
-            instance.stage.removeChild(particle.graphic);
-            particle.graphic.destroy();
-            particles.splice(index, 1);
+          effect.particles.forEach((particle, particleIndex) => {
+            const progress =
+              (particle.offset + time * (0.72 + particle.speed)) % 1;
+            const wave =
+              Math.sin(time * Math.PI * 2 + particle.phase) *
+              effect.height *
+              0.07;
+            particle.graphic.position.set(
+              effect.x + effect.width * (0.08 + progress * 0.84),
+              effect.y + effect.height * (0.25 + particle.lane * 0.5) + wave,
+            );
+            particle.graphic.alpha =
+              Math.sin(progress * Math.PI) * envelope * 0.78;
+            particle.graphic.scale.set(
+              0.8 +
+                Math.sin(time * Math.PI + particleIndex * 0.55) * 0.12,
+            );
+          });
+
+          if (time >= 1) {
+            instance.stage.removeChild(effect.root);
+            instance.stage.removeChild(effect.mask);
+            effect.root.destroy({ children: true });
+            effect.mask.destroy();
+            activePulses.splice(index, 1);
           }
         }
+
+        if (activePulses.length === 0) instance.stop();
       });
 
-      handleVisibility = () =>
-        document.hidden ? instance.stop() : instance.start();
-      document.addEventListener("visibilitychange", handleVisibility);
+      instance.stop();
     };
 
     void initialise();
@@ -143,9 +182,6 @@ export default function ConfiguratorEffects({
     return () => {
       disposed = true;
       apiRef.current = null;
-      if (handleVisibility) {
-        document.removeEventListener("visibilitychange", handleVisibility);
-      }
       app?.stop();
       app?.destroy();
       app = null;
@@ -153,8 +189,8 @@ export default function ConfiguratorEffects({
   }, []);
 
   useEffect(() => {
-    if (pulseKey > 0) apiRef.current?.burst(colour, false);
-  }, [pulseKey, colour]);
+    if (pulseKey > 0 && target) apiRef.current?.pulse(colour, target);
+  }, [pulseKey, colour, target]);
 
   return (
     <div ref={hostRef} className="configurator-effects" aria-hidden="true">

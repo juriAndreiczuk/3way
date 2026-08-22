@@ -1,6 +1,7 @@
 export type CategoryId = string;
 export type CourseId = string;
 export type QuestionId = string;
+export type CourseTypeId = string;
 
 export type QuestionType = "routing" | "scoring";
 export type ScoreMap = Partial<Record<CourseId, number>>;
@@ -67,13 +68,27 @@ export interface ResultTemplate {
   };
 }
 
-export interface CourseConfiguratorData {
+export interface CourseType {
+  id: CourseTypeId;
+  name: string;
   config: ConfiguratorConfig;
   categories: Category[];
   courses: Course[];
   questions: Question[];
   resultLogic: ResultLogic;
   resultTemplate: ResultTemplate;
+}
+
+export interface RootConfiguratorConfig {
+  title: string;
+  description: string;
+  courseTypeSelectionTitle: string;
+  courseTypes: CourseTypeId[];
+}
+
+export interface CourseConfiguratorData {
+  config: RootConfiguratorConfig;
+  courseTypes: CourseType[];
 }
 
 export interface RankedCourse {

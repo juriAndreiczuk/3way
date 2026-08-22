@@ -2,6 +2,8 @@ import rawConfigurator from "../content/configurator.json";
 import type {
   Answer,
   CourseConfiguratorData,
+  CourseType,
+  CourseTypeId,
   Question,
   QuestionId,
   QuizResult,
@@ -10,24 +12,60 @@ import type {
 
 export const courseConfigurator = rawConfigurator as CourseConfiguratorData;
 
-const questionsById = new Map(
-  courseConfigurator.questions.map((question) => [question.id, question]),
+const courseTypesById = new Map(
+  courseConfigurator.courseTypes.map((courseType) => [courseType.id, courseType]),
 );
 
-const categoriesById = new Map(
-  courseConfigurator.categories.map((category) => [category.id, category]),
-);
+export function getCourseType(courseTypeId: CourseTypeId): CourseType {
+  const courseType = courseTypesById.get(courseTypeId);
 
-export const firstQuestionId = courseConfigurator.questions[0]?.id;
+  if (!courseType) {
+    throw new Error(`Unknown configurator course type: ${courseTypeId}`);
+  }
 
-export function getQuestion(questionId: QuestionId): Question {
-  const question = questionsById.get(questionId);
+  return courseType;
+}
+
+export function getFirstQuestionId(courseTypeId: CourseTypeId): QuestionId | null {
+  return getCourseType(courseTypeId).questions[0]?.id ?? null;
+}
+
+export function getQuestion(
+  courseTypeId: CourseTypeId,
+  questionId: QuestionId,
+): Question {
+  const question = getCourseType(courseTypeId).questions.find(
+    (candidate) => candidate.id === questionId,
+  );
 
   if (!question) {
     throw new Error(`Unknown configurator question: ${questionId}`);
   }
 
   return question;
+}
+
+export function getQuestionPathLength(
+  courseTypeId: CourseTypeId,
+  startingQuestionId: QuestionId | null,
+): number {
+  const courseType = getCourseType(courseTypeId);
+  const questionsById = new Map(
+    courseType.questions.map((question) => [question.id, question]),
+  );
+  const visited = new Set<QuestionId>();
+  let questionId = startingQuestionId;
+  let length = 0;
+
+  while (questionId && !visited.has(questionId)) {
+    visited.add(questionId);
+    const question = questionsById.get(questionId);
+    if (!question) break;
+    length += 1;
+    questionId = question.nextQuestionId ?? null;
+  }
+
+  return length;
 }
 
 export function resolveNextQuestionId(
@@ -48,10 +86,15 @@ export function addScores(current: ScoreMap, added: ScoreMap): ScoreMap {
 }
 
 export function calculateResult(
+  courseTypeId: CourseTypeId,
   scores: ScoreMap,
   routingScores: ScoreMap,
 ): QuizResult {
-  const rankedCourses = courseConfigurator.courses
+  const courseType = getCourseType(courseTypeId);
+  const categoriesById = new Map(
+    courseType.categories.map((category) => [category.id, category]),
+  );
+  const rankedCourses = courseType.courses
     .map((course, originalIndex) => {
       const category = categoriesById.get(course.categoryId);
 
@@ -73,7 +116,7 @@ export function calculateResult(
         right.routingScore - left.routingScore ||
         left.originalIndex - right.originalIndex,
     )
-    .slice(0, courseConfigurator.config.resultsLimit)
+    .slice(0, courseType.config.resultsLimit)
     .map(({ course, category, score }) => ({ course, category, score }));
 
   const [primary, ...alternatives] = rankedCourses;
@@ -86,7 +129,7 @@ export function calculateResult(
     primary,
     alternatives: alternatives.slice(
       0,
-      courseConfigurator.resultLogic.alternativeResults,
+      courseType.resultLogic.alternativeResults,
     ),
   };
 }

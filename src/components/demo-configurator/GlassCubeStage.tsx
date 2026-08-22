@@ -11,6 +11,7 @@ type StageVariant = "start" | "routing" | "companion" | "processing";
 
 interface GlassCubeStageProps {
   variant: StageVariant;
+  categoryIds?: VisualCategoryId[];
   categoryId?: VisualCategoryId | null;
   selectedCategoryId?: VisualCategoryId | null;
   hoveredCategoryId?: VisualCategoryId | null;
@@ -100,6 +101,7 @@ function createCubeUnit(colour: number, size = 1.35, iconPath?: string): CubeUni
 
 export default function GlassCubeStage({
   variant,
+  categoryIds = [],
   categoryId = null,
   selectedCategoryId = null,
   hoveredCategoryId = null,
@@ -114,6 +116,7 @@ export default function GlassCubeStage({
   const apiRef = useRef<StageApi | null>(null);
   const completionRef = useRef(onSelectionComplete);
   const startCompletionRef = useRef(onStartComplete);
+  const categoryIdsKey = categoryIds.join("|");
 
   useEffect(() => {
     completionRef.current = onSelectionComplete;
@@ -164,7 +167,10 @@ export default function GlassCubeStage({
     const startFrames: THREE.LineSegments[] = [];
 
     if (variant === "routing") {
-      visualCategories.forEach((category, index) => {
+      const routingCategories = categoryIds.length
+        ? categoryIds.map((id) => getVisualCategory(id))
+        : visualCategories.slice(0, 5);
+      routingCategories.forEach((category, index) => {
         const unit = createCubeUnit(category.colour, 1.3, category.iconPath);
         unit.group.position.set((index - 2) * 4.35, 0.25, index % 2 === 0 ? 0 : -0.2);
         unit.group.rotation.set(0.18 + index * 0.025, 0.4 - index * 0.13, 0.08);
@@ -473,7 +479,7 @@ export default function GlassCubeStage({
       });
       renderer.dispose();
     };
-  }, [variant, categoryId]);
+  }, [variant, categoryId, categoryIdsKey]);
 
   useEffect(() => {
     if (selectedCategoryId) apiRef.current?.select(selectedCategoryId);

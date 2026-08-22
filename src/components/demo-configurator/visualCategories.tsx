@@ -1,5 +1,7 @@
 import {
   BookOpen,
+  Brain,
+  Cpu,
   Heartbeat,
   PersonSimpleRun,
   Scales,
@@ -12,6 +14,8 @@ export const visualCategoryIds = [
   "sport",
   "zdrowie",
   "biznes",
+  "it",
+  "psychologia",
 ] as const;
 
 export type VisualCategoryId = (typeof visualCategoryIds)[number];
@@ -66,15 +70,23 @@ export const visualCategories: VisualCategory[] = [
     cssColour: "#8c7bff",
     iconPath: "M240,56v64a8,8,0,0,1-16,0V75.31l-82.34,82.35a8,8,0,0,1-11.32,0L96,123.31,29.66,189.66a8,8,0,0,1-11.32-11.32l72-72a8,8,0,0,1,11.32,0L136,140.69,212.69,64H168a8,8,0,0,1,0-16h64A8,8,0,0,1,240,56Z",
   },
+  {
+    id: "it",
+    label: "IT",
+    shortLabel: "TECH",
+    colour: 0x20d9ff,
+    cssColour: "#20d9ff",
+    iconPath: "M152,96H104a8,8,0,0,0-8,8v48a8,8,0,0,0,8,8h48a8,8,0,0,0,8-8V104A8,8,0,0,0,152,96Zm-8,48H112V112h32Zm88,0H216V112h16a8,8,0,0,0,0-16H216V56a16,16,0,0,0-16-16H160V24a8,8,0,0,0-16,0V40H112V24a8,8,0,0,0-16,0V40H56A16,16,0,0,0,40,56V96H24a8,8,0,0,0,0,16H40v32H24a8,8,0,0,0,0,16H40v40a16,16,0,0,0,16,16H96v16a8,8,0,0,0,16,0V216h32v16a8,8,0,0,0,16,0V216h40a16,16,0,0,0,16-16V160h16a8,8,0,0,0,0-16Zm-32,56H56V56H200V200Z",
+  },
+  {
+    id: "psychologia",
+    label: "Psychologia",
+    shortLabel: "MIND",
+    colour: 0xff6fcf,
+    cssColour: "#ff6fcf",
+    iconPath: "M248,124a56.11,56.11,0,0,0-32-50.61V72a48,48,0,0,0-88-26.49A48,48,0,0,0,40,72v1.39a56,56,0,0,0,0,101.2V176a48,48,0,0,0,88,26.49A48,48,0,0,0,216,176v-1.41A56.09,56.09,0,0,0,248,124ZM88,208a32,32,0,0,1-31.81-28.56A55.87,55.87,0,0,0,64,180h8a8,8,0,0,0,0-16H64A40,40,0,0,1,50.67,86.27,8,8,0,0,0,56,78.73V72a32,32,0,0,1,64,0v68.26A47.8,47.8,0,0,0,88,128a8,8,0,0,0,0,16,32,32,0,0,1,0,64Zm104-44h-8a8,8,0,0,0,0,16h8a55.87,55.87,0,0,0,7.81-.56A32,32,0,1,1,168,144a8,8,0,0,0,0-16,47.8,47.8,0,0,0-32,12.26V72a32,32,0,0,1,64,0v6.73a8,8,0,0,0,5.33,7.54A40,40,0,0,1,192,164Z",
+  },
 ];
-
-export const categoryIdByRoutingAnswer: Record<string, VisualCategoryId> = {
-  A: "pedagogika",
-  B: "prawo",
-  C: "sport",
-  D: "zdrowie",
-  E: "biznes",
-};
 
 export function getVisualCategory(
   categoryId: VisualCategoryId | null,
@@ -97,6 +109,10 @@ export function CategoryGlyph({
   const props = { size, weight, "aria-hidden": true } as const;
 
   switch (categoryId) {
+    case "it":
+      return <Cpu {...props} />;
+    case "psychologia":
+      return <Brain {...props} />;
     case "prawo":
       return <Scales {...props} />;
     case "sport":
