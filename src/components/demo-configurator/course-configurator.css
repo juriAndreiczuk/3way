@@ -582,7 +582,7 @@
   min-width: 0;
   height: 15.5rem;
   padding: 1rem 0.7rem;
-  border: 1px solid transparent;
+  border: 1px solid rgba(145, 132, 205, 0.13);
   border-radius: 1rem;
   background: linear-gradient(180deg, transparent 18%, rgba(8, 10, 29, 0.12) 56%, rgba(8, 10, 29, 0.82));
   color: #f5f2ff;
@@ -621,10 +621,11 @@
   position: absolute;
   top: 0.8rem;
   left: 0.85rem;
-  color: #77738f;
+  color: #9691b2;
   font-size: 0.62rem;
   font-weight: 800;
   letter-spacing: 0.15em;
+  text-shadow: 0 0 10px rgba(155, 108, 255, 0.12);
 }
 
 .routing-option strong,

@@ -172,7 +172,7 @@ export default function GlassCubeStage({
         : visualCategories.slice(0, 5);
       routingCategories.forEach((category, index) => {
         const unit = createCubeUnit(category.colour, 1.3, category.iconPath);
-        unit.group.position.set((index - 2) * 4.35, 0.25, index % 2 === 0 ? 0 : -0.2);
+        unit.group.position.set((index - 2) * 4.35, 0.7, index % 2 === 0 ? 0 : -0.2);
         unit.group.rotation.set(0.18 + index * 0.025, 0.4 - index * 0.13, 0.08);
         unit.group.userData.baseX = unit.group.position.x;
         unit.group.userData.categoryId = category.id;
