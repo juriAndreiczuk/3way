@@ -13,7 +13,10 @@ interface CompassApi {
   activate: () => void;
 }
 
-function createLabelTexture(label: string, colour: string): THREE.CanvasTexture {
+function createLabelTexture(
+  label: string,
+  colour: string,
+): THREE.CanvasTexture {
   const canvas = document.createElement("canvas");
   canvas.width = 128;
   canvas.height = 128;
@@ -27,6 +30,25 @@ function createLabelTexture(label: string, colour: string): THREE.CanvasTexture 
     context.shadowColor = colour;
     context.shadowBlur = 14;
     context.fillText(label, 64, 66);
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
+}
+
+function createGlowTexture(colour: string): THREE.CanvasTexture {
+  const canvas = document.createElement("canvas");
+  canvas.width = 128;
+  canvas.height = 128;
+  const context = canvas.getContext("2d");
+  if (context) {
+    const gradient = context.createRadialGradient(64, 64, 2, 64, 64, 62);
+    gradient.addColorStop(0, colour);
+    gradient.addColorStop(0.2, colour);
+    gradient.addColorStop(0.52, `${colour}66`);
+    gradient.addColorStop(1, `${colour}00`);
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, 128, 128);
   }
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
@@ -95,25 +117,42 @@ export default function NeonCompassStage({
     const state = {
       alignment: 0,
       intensity: 0,
-      needleAngle: -0.22,
+      needleAngle: -0.08,
     };
 
     const arcGroups: THREE.Group[] = [];
     const arcMaterials: THREE.MeshBasicMaterial[] = [];
     const arcDefinitions = [
-      { radius: 1.66, width: 0.018, segments: [[0.12, 1.42], [1.82, 1.15], [3.35, 1.3], [5.05, 0.96]] },
-      { radius: 1.38, width: 0.012, segments: [[0.38, 1.1], [1.72, 1.42], [3.48, 0.9], [4.67, 1.18]] },
-      { radius: 1.08, width: 0.009, segments: [[0.08, 1.75], [2.18, 1.25], [3.77, 1.62]] },
+      {
+        radius: 1.66,
+        width: 0.012,
+        segments: [
+          [0.12, 1.42],
+          [1.82, 1.15],
+          [3.35, 1.3],
+          [5.05, 0.96],
+        ],
+      },
+      {
+        radius: 1.38,
+        width: 0.01,
+        segments: [
+          [0.38, 1.1],
+          [1.72, 1.42],
+          [3.48, 0.9],
+          [4.67, 1.18],
+        ],
+      },
     ] as const;
 
     arcDefinitions.forEach((definition, ringIndex) => {
       const ringGroup = new THREE.Group();
       ringGroup.position.z = -0.06 - ringIndex * 0.045;
-      definition.segments.forEach(([start, length], segmentIndex) => {
+      definition.segments.forEach(([start, length]) => {
         const material = new THREE.MeshBasicMaterial({
-          color: segmentIndex === 0 && ringIndex === 0 ? 0x20d9ff : 0x9b6cff,
+          color: 0xad92ff,
           transparent: true,
-          opacity: 0.3 - ringIndex * 0.045,
+          opacity: 0.7,
           side: THREE.DoubleSide,
           depthWrite: false,
         });
@@ -121,7 +160,7 @@ export default function NeonCompassStage({
           new THREE.RingGeometry(
             definition.radius - definition.width,
             definition.radius + definition.width,
-            64,
+            96,
             1,
             start,
             length,
@@ -131,7 +170,7 @@ export default function NeonCompassStage({
         ringGroup.add(arc);
         arcMaterials.push(material);
       });
-      ringGroup.rotation.z = ringIndex === 0 ? 0.23 : ringIndex === 1 ? -0.31 : 0.16;
+      ringGroup.rotation.z = ringIndex === 0 ? 0.23 : -0.31;
       root.add(ringGroup);
       arcGroups.push(ringGroup);
     });
@@ -152,7 +191,11 @@ export default function NeonCompassStage({
       const major = index % 8 === 0;
       const angle = (index / 32) * Math.PI * 2;
       const tick = new THREE.Mesh(
-        new THREE.BoxGeometry(major ? 0.026 : 0.012, major ? 0.18 : 0.09, 0.015),
+        new THREE.BoxGeometry(
+          major ? 0.026 : 0.012,
+          major ? 0.18 : 0.09,
+          0.015,
+        ),
         major ? majorTickMaterial : tickMaterial,
       );
       const radius = major ? 1.52 : 1.5;
@@ -183,6 +226,54 @@ export default function NeonCompassStage({
 
     const needle = new THREE.Group();
     needle.position.z = 0.2;
+    const northGlowMaterial = new THREE.MeshBasicMaterial({
+      color: 0x20d9ff,
+      transparent: true,
+      opacity: 0,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+    const southGlowMaterial = new THREE.MeshBasicMaterial({
+      color: 0x9b6cff,
+      transparent: true,
+      opacity: 0,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+    const northGlow = new THREE.Mesh(
+      createNeedleShape(1.24, 0.14),
+      northGlowMaterial,
+    );
+    const southGlow = new THREE.Mesh(
+      createNeedleShape(-0.92, 0.11),
+      southGlowMaterial,
+    );
+    northGlow.scale.setScalar(1.025);
+    southGlow.scale.setScalar(1.025);
+    northGlow.position.z = -0.01;
+    southGlow.position.z = -0.01;
+    const northAuraMaterial = new THREE.SpriteMaterial({
+      map: createGlowTexture("#20d9ff"),
+      transparent: true,
+      opacity: 0,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      depthTest: false,
+    });
+    const southAuraMaterial = new THREE.SpriteMaterial({
+      map: createGlowTexture("#9b6cff"),
+      transparent: true,
+      opacity: 0,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      depthTest: false,
+    });
+    const northAura = new THREE.Sprite(northAuraMaterial);
+    northAura.position.set(0, 0.55, -0.02);
+    northAura.scale.set(0.82, 1.62, 1);
+    const southAura = new THREE.Sprite(southAuraMaterial);
+    southAura.position.set(0, -0.4, -0.02);
+    southAura.scale.set(0.68, 1.18, 1);
     const northNeedle = new THREE.Mesh(
       createNeedleShape(1.24, 0.14),
       new THREE.MeshBasicMaterial({
@@ -200,7 +291,14 @@ export default function NeonCompassStage({
       }),
     );
     northNeedle.position.z = 0.01;
-    needle.add(northNeedle, southNeedle);
+    needle.add(
+      northAura,
+      southAura,
+      northGlow,
+      southGlow,
+      northNeedle,
+      southNeedle,
+    );
     root.add(needle);
 
     const pulseMaterial = new THREE.MeshBasicMaterial({
@@ -228,9 +326,9 @@ export default function NeonCompassStage({
       gsap.to(state, {
         alignment: nextHovered ? 1 : 0,
         intensity: nextHovered ? 1 : 0,
-        needleAngle: nextHovered ? 0 : -0.22,
-        duration: 1.32,
-        ease: "power2.out",
+        needleAngle: nextHovered ? 0 : -0.08,
+        duration: nextHovered ? 0.72 : 1.05,
+        ease: "power3.out",
         overwrite: "auto",
       });
     };
@@ -239,7 +337,8 @@ export default function NeonCompassStage({
       if (isActive) return;
       isActive = true;
       gsap.killTweensOf(state);
-      gsap.timeline({ onComplete: () => completionRef.current() })
+      gsap
+        .timeline({ onComplete: () => completionRef.current() })
         .to(state, {
           alignment: 1,
           intensity: 1.4,
@@ -255,13 +354,17 @@ export default function NeonCompassStage({
           0.72,
         )
         .to(pulseMaterial, { opacity: 0, duration: 0.32 }, 1.05)
-        .to(root.scale, {
-          x: 0.92,
-          y: 0.92,
-          z: 0.92,
-          duration: 0.24,
-          ease: "power2.in",
-        }, 1.18);
+        .to(
+          root.scale,
+          {
+            x: 0.92,
+            y: 0.92,
+            z: 0.92,
+            duration: 0.24,
+            ease: "power2.in",
+          },
+          1.18,
+        );
     };
 
     apiRef.current = { setHovered, activate };
@@ -284,13 +387,26 @@ export default function NeonCompassStage({
       elapsed += delta;
 
       arcGroups.forEach((ring, index) => {
-        const baseRotation = index === 0 ? 0.23 : index === 1 ? -0.31 : 0.16;
-        const drift = elapsed * (0.035 + index * 0.012) * (index % 2 === 0 ? 1 : -1);
-        ring.rotation.z = THREE.MathUtils.lerp(baseRotation + drift, 0, state.alignment);
+        const baseRotation = index === 0 ? 0.23 : -0.31;
+        const drift =
+          elapsed * (0.035 + index * 0.012) * (index % 2 === 0 ? 1 : -1);
+        ring.rotation.z = THREE.MathUtils.lerp(
+          baseRotation + drift,
+          0,
+          state.alignment,
+        );
       });
-      needle.rotation.z = state.needleAngle + (isActive ? 0 : Math.sin(elapsed * 0.7) * 0.035 * (1 - state.alignment));
-      arcMaterials.forEach((material, index) => {
-        material.opacity = 0.28 - (index % 3) * 0.035 + state.intensity * 0.2;
+      const needleDrift =
+        (Math.sin(elapsed * 0.85) * 0.28 + Math.sin(elapsed * 0.31) * 0.06) *
+        (1 - state.alignment);
+      needle.rotation.z = state.needleAngle + (isActive ? 0 : needleDrift);
+      const readyPulse = 0.82 + Math.sin(elapsed * 5) * 0.18;
+      northGlowMaterial.opacity = state.intensity * (0.62 + readyPulse * 0.12);
+      southGlowMaterial.opacity = state.intensity * (0.46 + readyPulse * 0.1);
+      northAuraMaterial.opacity = state.intensity * readyPulse * 0.34;
+      southAuraMaterial.opacity = state.intensity * readyPulse * 0.25;
+      arcMaterials.forEach((material) => {
+        material.opacity = 0.7 + state.intensity * 0.12;
       });
       tickMaterial.opacity = 0.55 + state.intensity * 0.2;
       majorTickMaterial.opacity = 0.82 + state.intensity * 0.14;
@@ -302,7 +418,8 @@ export default function NeonCompassStage({
 
     const startRendering = () => renderer.setAnimationLoop(renderFrame);
     const stopRendering = () => renderer.setAnimationLoop(null);
-    const handleVisibility = () => (document.hidden ? stopRendering() : startRendering());
+    const handleVisibility = () =>
+      document.hidden ? stopRendering() : startRendering();
     document.addEventListener("visibilitychange", handleVisibility);
     startRendering();
 
@@ -321,7 +438,9 @@ export default function NeonCompassStage({
         }
         if (!(object instanceof THREE.Mesh)) return;
         object.geometry.dispose();
-        const materials = Array.isArray(object.material) ? object.material : [object.material];
+        const materials = Array.isArray(object.material)
+          ? object.material
+          : [object.material];
         materials.forEach((material) => material.dispose());
       });
       renderer.dispose();

@@ -47,6 +47,7 @@ export default function ConfiguratorEffects({
 
     let disposed = false;
     let app: Application | null = null;
+    let handleVisibility: (() => void) | null = null;
 
     const initialise = async () => {
       const instance = new Application();
@@ -67,25 +68,7 @@ export default function ConfiguratorEffects({
 
       app = instance;
       instance.ticker.maxFPS = 30;
-      const grid = new Graphics();
       const particles: Particle[] = [];
-      instance.stage.addChild(grid);
-
-      const drawGrid = () => {
-        const width = instance.screen.width;
-        const height = instance.screen.height;
-        grid.clear();
-        for (let x = 24; x < width; x += 48) {
-          grid.moveTo(x, 0).lineTo(x, height);
-        }
-        for (let y = 24; y < height; y += 48) {
-          grid.moveTo(0, y).lineTo(width, y);
-        }
-        grid.stroke({ color: 0x7868d9, width: 1, alpha: 0.045 });
-      };
-      drawGrid();
-      const resizeObserver = new ResizeObserver(drawGrid);
-      resizeObserver.observe(host);
 
       const burst = (burstColour: number, isProcessing: boolean) => {
         const amount = isProcessing ? 44 : 24;
@@ -104,7 +87,9 @@ export default function ConfiguratorEffects({
             duration: 1.35 + (index % 7) * 0.08,
             offset: index / amount,
             lift: 36 + (index % 6) * 14,
-            startX: isProcessing ? width * 0.5 : width * (0.58 + (index % 5) * 0.035),
+            startX: isProcessing
+              ? width * 0.5
+              : width * (0.58 + (index % 5) * 0.035),
             startY: isProcessing ? height * 0.75 : height * 0.72,
             targetX: isProcessing ? width * 0.5 : width * 0.16,
             targetY: isProcessing ? height * 0.38 : height * 0.2,
@@ -127,10 +112,14 @@ export default function ConfiguratorEffects({
           particle.life += delta;
           const progress = Math.min(particle.life / particle.duration, 1);
           const eased = 1 - Math.pow(1 - progress, 3);
-          const wave = Math.sin((progress + particle.offset) * Math.PI * 2) * 18;
+          const wave =
+            Math.sin((progress + particle.offset) * Math.PI * 2) * 18;
           particle.graphic.position.set(
-            particle.startX + (particle.targetX - particle.startX) * eased + wave,
-            particle.startY + (particle.targetY - particle.startY) * eased -
+            particle.startX +
+              (particle.targetX - particle.startX) * eased +
+              wave,
+            particle.startY +
+              (particle.targetY - particle.startY) * eased -
               Math.sin(progress * Math.PI) * particle.lift,
           );
           particle.graphic.alpha = Math.sin(progress * Math.PI) * 0.88;
@@ -144,25 +133,22 @@ export default function ConfiguratorEffects({
         }
       });
 
-      const handleVisibility = () => (document.hidden ? instance.stop() : instance.start());
+      handleVisibility = () =>
+        document.hidden ? instance.stop() : instance.start();
       document.addEventListener("visibilitychange", handleVisibility);
-
-      return () => {
-        resizeObserver.disconnect();
-        document.removeEventListener("visibilitychange", handleVisibility);
-      };
     };
 
-    let cleanup: (() => void) | undefined;
-    void initialise().then((result) => {
-      cleanup = result;
-    });
+    void initialise();
 
     return () => {
       disposed = true;
       apiRef.current = null;
-      cleanup?.();
+      if (handleVisibility) {
+        document.removeEventListener("visibilitychange", handleVisibility);
+      }
+      app?.stop();
       app?.destroy();
+      app = null;
     };
   }, []);
 
